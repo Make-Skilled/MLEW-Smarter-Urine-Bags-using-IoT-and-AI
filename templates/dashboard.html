@@ -1,0 +1,1044 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+    <header class="dashboard-header">
+        <div class="header-left">
+            <h1>Welcome, {{ current_user.name }}!</h1>
+            <div class="last-updated">
+                <i class="fas fa-sync-alt"></i>
+                Last updated: <span id="update-time"></span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="refresh-btn" onclick="updateDashboard()">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-title">24h Statistics</div>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Avg Volume</span>
+                    <span id="avg-volume" class="stat-value">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Avg Temperature</span>
+                    <span id="avg-temp" class="stat-value">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">UTI Risk Events</span>
+                    <span id="uti-risk-count" class="stat-value">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- UTI Risk Assessment Card -->
+        <div class="dashboard-card primary-card">
+            <div class="card-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> UTI Risk Assessment</h3>
+                <div class="card-tools">
+                    <button class="info-btn" title="View Details">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="uti-risk" class="risk-indicator">
+                <div class="risk-loading">
+                    <div class="spinner"></div>
+                    <span>Analyzing...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Urine Condition Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><i class="fas fa-flask"></i> Urine Condition</h3>
+            </div>
+            <div class="condition-container">
+                <div id="urine-condition" class="condition-display">
+                    <div class="condition-loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                <div class="condition-status-indicator"></div>
+            </div>
+        </div>
+
+        <!-- Volume Monitoring Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><i class="fas fa-tint"></i> Urine Volume</h3>
+            </div>
+            <div class="metric-container">
+                <div id="volume-gauge" class="gauge"></div>
+                <div class="metric-details">
+                    <div id="volume-value" class="metric-value">--</div>
+                    <div class="metric-label">milliliters</div>
+                </div>
+                <div class="threshold-indicators">
+                    <div class="threshold normal">Normal: 0-100 mL</div>
+                    <div class="threshold warning">Warning: 100-300 mL</div>
+                    <div class="threshold danger">Critical: >300 mL</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Temperature Card -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><i class="fas fa-thermometer-half"></i> Temperature</h3>
+            </div>
+            <div class="metric-container">
+                <div id="temp-gauge" class="gauge"></div>
+                <div class="metric-details">
+                    <div id="temp-value" class="metric-value">--</div>
+                    <div class="metric-label">Celsius</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Analysis Card
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><i class="fas fa-palette"></i> Color Analysis</h3>
+            </div> -->
+            <!-- <div class="color-metrics">
+                <div class="color-analysis-container">
+                    Main color preview with hexagon shape
+                    <div class="color-preview-wrapper">
+                        <div class="color-preview-hexagon">
+                            <div class="color-preview" id="color-preview"></div>
+                        </div>
+                        <div class="color-hex-value" id="color-hex">#000000</div>
+                    </div>
+
+                    RGB color components
+                    <div class="color-components">
+                        <div class="color-component">
+                            <div class="component-label">Red</div>
+                            <div class="color-bar-container">
+                                <div class="color-bar" id="red-bar"></div>
+                                <span class="color-value" id="red-value">0</span>
+                            </div>
+                        </div>
+                        <div class="color-component">
+                            <div class="component-label">Green</div>
+                            <div class="color-bar-container">
+                                <div class="color-bar" id="green-bar"></div>
+                                <span class="color-value" id="green-value">0</span>
+                            </div>
+                        </div>
+                        <div class="color-component">
+                            <div class="component-label">Blue</div>
+                            <div class="color-bar-container">
+                                <div class="color-bar" id="blue-bar"></div>
+                                <span class="color-value" id="blue-value">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    Color analysis results
+                    <div class="color-analysis-result">
+                        <div class="analysis-label">Analysis Result:</div>
+                        <div class="analysis-value" id="color-condition">Analyzing...</div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- Historical Data Card -->
+        <!-- <div class="dashboard-card full-width">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-line"></i> Historical Data</h3>
+                <div class="chart-controls">
+                    <select id="chart-timeframe" onchange="updateHistoricalData()">
+                        <option value="24h">Last 24 Hours</option>
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d">Last 30 Days</option>
+                    </select>
+                    <div class="chart-type-toggle">
+                        <button class="active" data-type="line" onclick="updateChartType('line')">
+                            <i class="fas fa-chart-line"></i>
+                        </button>
+                        <button data-type="bar" onclick="updateChartType('bar')">
+                            <i class="fas fa-chart-bar"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="historical-chart" class="chart-container"></div>
+        </div> -->
+    </div>
+</div>
+
+<!-- Add required scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
+<script src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script>
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+
+<style>
+/* Color Variables */
+:root {
+    --primary: #4f46e5;
+    --primary-light: #6366f1;
+    --secondary: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --background: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --gradient-1: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    --gradient-2: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.dashboard {
+    padding: 2rem;
+    background: var(--background);
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    background: var(--gradient-1);
+    margin: -2rem -2rem 2rem -2rem;
+    padding: 2rem;
+    color: white;
+    border-radius: 0 0 1.5rem 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.header-left h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.last-updated {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.refresh-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.dashboard-stats {
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--gradient-2);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    color: white;
+}
+
+.stat-title {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    text-align: center;
+}
+
+.stat-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 12px -1px rgb(0 0 0 / 0.15);
+}
+
+.card-header {
+    background: rgba(79, 70, 229, 0.05);
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(79, 70, 229, 0.1);
+}
+
+.card-header h3 {
+    font-size: 1.2rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.metric-container {
+    padding: 2rem;
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary);
+    margin: 1rem 0;
+    transition: opacity 0.3s ease;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.threshold-indicators {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.threshold {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.threshold.normal {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success);
+}
+
+.threshold.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.threshold.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.color-metrics {
+    padding: 1.5rem;
+}
+
+.color-preview {
+    height: 100px;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.color-components {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.color-component {
+    background: rgba(79, 70, 229, 0.05);
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.color-component label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.color-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.color-bar {
+    flex-grow: 1;
+    height: 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.color-value {
+    min-width: 3ch;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.risk-indicator {
+    padding: 2rem;
+    text-align: center;
+}
+
+.risk-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 1rem 2rem;
+    border-radius: 0.75rem;
+    display: inline-block;
+}
+
+.risk-value.high-risk {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.risk-value.low-risk {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success);
+}
+
+.chart-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.chart-type-toggle {
+    display: flex;
+    background: rgba(79, 70, 229, 0.05);
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+}
+
+.chart-type-toggle button {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chart-type-toggle button.active {
+    background: var(--primary);
+    color: white;
+}
+
+#chart-timeframe {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    border-radius: 0.5rem;
+    background: white;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(79, 70, 229, 0.1);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Color Analysis Specific Styles */
+.color-analysis-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.color-preview-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.color-preview-hexagon {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
+    padding: 4px;
+}
+
+.color-preview {
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    transition: all 0.3s ease;
+}
+
+.color-hex-value {
+    font-family: 'Courier New', monospace;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+.color-components {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.color-component {
+    background: rgba(255,255,255,0.03);
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--glass-border);
+}
+
+.component-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.component-header label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.color-value {
+    font-family: 'Courier New', monospace;
+    color: var(--text-primary);
+    font-weight: 600;
+    min-width: 3ch;
+}
+
+.color-bar-wrapper {
+    position: relative;
+}
+
+.color-bar-container {
+    position: relative;
+    padding: 0.25rem 0;
+}
+
+.color-bar {
+    height: 8px;
+    border-radius: 4px;
+    width: 0%;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.color-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        rgba(255,255,255,0.2) 50%,
+        transparent 100%
+    );
+    animation: shimmer 2s infinite linear;
+}
+
+.color-bar-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.color-analysis-result {
+    background: rgba(255,255,255,0.03);
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--glass-border);
+    text-align: center;
+}
+
+.analysis-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.analysis-value {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Add these styles for the condition indicators */
+.analysis-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.analysis-value.dehydration-risk {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.analysis-value.normal {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.analysis-value.possible-infection {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.analysis-value.check-sample {
+    background: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Make the dashboard responsive */
+@media (max-width: 768px) {
+    .dashboard {
+        padding: 1rem;
+    }
+    
+    .dashboard-header {
+        margin: -1rem -1rem 1rem -1rem;
+        padding: 1.5rem;
+    }
+    
+    .header-left h1 {
+        font-size: 1.5rem;
+    }
+    
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+let historicalChart = null;
+let currentChartType = 'line';
+
+// Add this function to check if data is valid
+function isValidData(data) {
+    console.log("Received data:", data); // Debug log
+    return data && typeof data === 'object' && !data.error;
+}
+
+// Initialize dashboard
+function initializeDashboard() {
+    console.log("Initializing dashboard..."); // Debug log
+    updateDashboard();
+    
+    // Update every 10 seconds
+    setInterval(updateDashboard, 10000);
+}
+
+// Update latest measurements
+async function updateDashboard() {
+    try {
+        showLoadingStates();
+        
+        const response = await fetch('/api/measurements/latest');
+        const data = await response.json();
+        
+        console.log("Dashboard update data:", data); // Debug log
+
+        if (data.error) {
+            console.error('Error:', data.error);
+            hideLoadingStates();
+            return;
+        }
+
+        // Update UTI Risk
+        const utiRiskElement = document.getElementById('uti-risk');
+        if (utiRiskElement) {
+            const riskClass = data.uti_risk ? 'high-risk' : 'low-risk';
+            utiRiskElement.innerHTML = `
+                <div class="risk-value ${riskClass}">
+                    ${data.uti_risk ? 'High Risk' : 'Low Risk'}
+                </div>
+            `;
+        }
+
+        // Update Urine Condition
+        const urineConditionElement = document.getElementById('urine-condition');
+        if (urineConditionElement && data.color) {
+            urineConditionElement.innerHTML = `
+                <div class="condition-value">
+                    ${data.color.condition || 'Unknown'}
+                </div>
+            `;
+        }
+
+        // Update Volume
+        const volumeElement = document.getElementById('volume-gauge');
+        if (volumeElement) {
+            updateGauge('volume-gauge', data.urine_volume);
+        }
+
+        // Update Temperature
+        if (data.temperature) {
+            const tempElement = document.getElementById('temp-value');
+            if (tempElement) {
+                tempElement.textContent = `${data.temperature.toFixed(1)}°C`;
+            }
+            updateGauge('temp-gauge', data.temperature);
+        }
+
+        // Update Color Analysis
+        if (data.color) {
+            updateColorAnalysis(data.color);
+        }
+
+        // Update last refresh time
+        const updateTimeElement = document.getElementById('update-time');
+        if (updateTimeElement) {
+            updateTimeElement.textContent = new Date().toLocaleTimeString();
+        }
+
+        hideLoadingStates();
+    } catch (error) {
+        console.error('Error updating dashboard:', error);
+        hideLoadingStates();
+    }
+}
+
+// Update historical data
+async function updateHistoricalData() {
+    try {
+        const timeframe = document.getElementById('chart-timeframe').value;
+        const response = await fetch(`/api/measurements/historical?timeframe=${timeframe}`);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error(data.error);
+            return;
+        }
+
+        updateHistoricalChart(data.measurements);
+    } catch (error) {
+        console.error('Error updating historical data:', error);
+    }
+}
+
+// Update statistics
+async function updateStats() {
+    try {
+        const response = await fetch('/api/measurements/stats');
+        const stats = await response.json();
+
+        if (stats.error) {
+            console.error(stats.error);
+            return;
+        }
+
+        document.getElementById('avg-volume').textContent = `${stats.urine_volume.avg.toFixed(1)} mL`;
+        document.getElementById('avg-temp').textContent = `${stats.temperature.avg.toFixed(1)}°C`;
+        document.getElementById('uti-risk-count').textContent = stats.uti_risk_count;
+    } catch (error) {
+        console.error('Error updating stats:', error);
+    }
+}
+
+function updateUIWithLatestData(data) {
+    // Update UTI Risk
+    const riskClass = data.uti_risk ? 'high-risk' : 'low-risk';
+    document.getElementById('uti-risk').innerHTML = `
+        <div class="risk-value ${riskClass}">
+            ${data.uti_risk ? 'High Risk' : 'Low Risk'}
+        </div>
+    `;
+
+    // Update Volume
+    updateValueWithFade('volume-value', `${data.urine_volume.toFixed(1)} mL`);
+    updateGauge('volume-gauge', data.urine_volume);
+
+    // Update Temperature
+    updateValueWithFade('temp-value', `${data.temperature.toFixed(1)}°C`);
+    updateGauge('temp-gauge', data.temperature);
+
+    // Update Color Analysis
+    if (data.color && data.color.condition) {
+        updateColorAnalysis(data.color);
+    }
+
+    // Update last refresh time
+    document.getElementById('update-time').textContent = new Date().toLocaleTimeString();
+}
+
+function updateHistoricalChart(measurements) {
+    const ctx = document.getElementById('historical-chart').getContext('2d');
+    
+    const datasets = [
+        {
+            label: 'Urine Volume (mL)',
+            data: measurements.map(m => ({ x: new Date(m.timestamp), y: m.urine_volume })),
+            borderColor: '#6366f1',
+            yAxisID: 'volume'
+        },
+        {
+            label: 'Temperature (°C)',
+            data: measurements.map(m => ({ x: new Date(m.timestamp), y: m.temperature })),
+            borderColor: '#ef4444',
+            yAxisID: 'temperature'
+        }
+    ];
+
+    if (historicalChart) {
+        historicalChart.destroy();
+    }
+
+    historicalChart = new Chart(ctx, {
+        type: currentChartType,
+        data: { datasets },
+        options: {
+            responsive: true,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'hour'
+                    }
+                },
+                volume: {
+                    type: 'linear',
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Volume (mL)'
+                    }
+                },
+                temperature: {
+                    type: 'linear',
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Temperature (°C)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateChartType(type) {
+    currentChartType = type;
+    updateHistoricalData();
+    
+    // Update button states
+    document.querySelectorAll('.chart-type-toggle button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+    });
+}
+
+function showLoadingStates() {
+    const loadingElements = document.querySelectorAll('.risk-indicator, .condition-display, .gauge');
+    loadingElements.forEach(el => {
+        el.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span>Analyzing...</span>
+            </div>
+        `;
+    });
+}
+
+function hideLoadingStates() {
+    const loadingSpinners = document.querySelectorAll('.loading-spinner');
+    loadingSpinners.forEach(spinner => {
+        spinner.style.display = 'none';
+    });
+}
+
+function updateValueWithFade(elementId, value) {
+    const element = document.getElementById(elementId);
+    element.style.opacity = '0';
+    setTimeout(() => {
+        element.textContent = value;
+        element.style.opacity = '1';
+    }, 300);
+}
+
+function updateColorAnalysis(color) {
+    const preview = document.getElementById('color-preview');
+    const hexValue = document.getElementById('color-hex');
+    const conditionElement = document.getElementById('color-condition');
+    
+    // Update color preview and hex value
+    const hexColor = rgbToHex(color.red, color.green, color.blue);
+    preview.style.backgroundColor = `rgb(${color.red},${color.green},${color.blue})`;
+    hexValue.textContent = hexColor;
+    
+    // Update color bars
+    updateColorBar('red', color.red);
+    updateColorBar('green', color.green);
+    updateColorBar('blue', color.blue);
+    
+    // Update condition text with fade effect
+    updateValueWithFade('color-condition', color.condition);
+    
+    // Add appropriate class for styling based on condition
+    setTimeout(() => {
+        conditionElement.className = 'analysis-value';
+        const conditionLower = color.condition.toLowerCase();
+        if (conditionLower.includes('dehydration')) {
+            conditionElement.classList.add('dehydration-risk');
+        } else if (conditionLower.includes('normal')) {
+            conditionElement.classList.add('normal');
+        } else if (conditionLower.includes('infection')) {
+            conditionElement.classList.add('possible-infection');
+        } else {
+            conditionElement.classList.add('check-sample');
+        }
+    }, 300);
+}
+
+function updateColorBar(color, value) {
+    const bar = document.getElementById(`${color}-bar`);
+    const valueSpan = document.getElementById(`${color}-value`);
+    
+    if (bar && valueSpan) {
+        bar.style.width = `${(value/255)*100}%`;
+        bar.style.backgroundColor = `rgb(${color === 'red' ? value : 0},${color === 'green' ? value : 0},${color === 'blue' ? value : 0})`;
+        valueSpan.textContent = value;
+    }
+}
+
+function updateColorCondition(color) {
+    const conditionElement = document.getElementById('color-condition');
+    let condition = analyzeUrineColor(color.red, color.green, color.blue);
+    
+    conditionElement.textContent = condition;
+    // Add appropriate class for styling based on condition
+    conditionElement.className = 'analysis-value ' + condition.toLowerCase().replace(/\s+/g, '-');
+}
+
+function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    }).join('');
+}
+
+function analyzeUrineColor(red, green, blue) {
+    if (red > green && red > blue) {
+        return "Dehydration Risk";
+    } else if (green > red && green > blue) {
+        return "Normal";
+    } else if (blue > red && blue > green) {
+        return "Possible Infection";
+    } else {
+        return "Analyzing Sample";
+    }
+}
+
+// Helper function to update condition styling
+function updateConditionStyling(element, condition) {
+    element.className = 'analysis-value';
+    const conditionLower = condition.toLowerCase();
+    if (conditionLower.includes('dehydration')) {
+        element.classList.add('dehydration-risk');
+    } else if (conditionLower.includes('normal')) {
+        element.classList.add('normal');
+    } else if (conditionLower.includes('infection')) {
+        element.classList.add('possible-infection');
+    } else {
+        element.classList.add('check-sample');
+    }
+}
+
+// Initialize the dashboard when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Content Loaded"); // Debug log
+    initializeDashboard();
+});
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    if (historicalChart) {
+        historicalChart.resize();
+    }
+});
+</script>
+{% endblock %}
