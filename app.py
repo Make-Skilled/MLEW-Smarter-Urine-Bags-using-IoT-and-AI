@@ -71,6 +71,10 @@ def process_measurement_data(feed_entry):
         urine_volume = float(feed_entry.get("field1", 0))
         temperature = float(feed_entry.get("field2", 0))
         turbidity = float(feed_entry.get("field3", 0))
+        red = int(float(feed_entry.get("field4", 0)))
+        green = int(float(feed_entry.get("field5", 0)))
+        blue = int(float(feed_entry.get("field6", 0)))
+        condition = feed_entry.get("field7", "Analyzing Sample")  # Get the condition from field7
 
         # Calculate UTI risk
         uti_risk = calculate_uti_risk(feed_entry)
@@ -80,11 +84,16 @@ def process_measurement_data(feed_entry):
             "urine_volume": urine_volume,
             "temperature": temperature,
             "turbidity": turbidity,
-            "uti_risk": uti_risk,
-            "condition": feed_entry.get("field7", "Normal")
+            "color": {
+                "red": red,
+                "green": green,
+                "blue": blue,
+                "condition": condition  # Include the condition in the response
+            },
+            "uti_risk": uti_risk
         }
     except Exception as e:
-        print(f"Error in process_measurement_data: {e}")
+        print(f"Error processing measurement data: {e}")
         return None
 
 def create_app():

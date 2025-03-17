@@ -17,7 +17,7 @@
         </div>
     </header>
 
-    <div class="dashboard-stats">
+    <!-- <div class="dashboard-stats">
         <div class="stat-card">
             <div class="stat-title">24h Statistics</div>
             <div class="stat-grid">
@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <div class="dashboard-grid">
         <!-- UTI Risk Assessment Card -->
@@ -77,7 +77,7 @@
                 <h3><i class="fas fa-tint"></i> Urine Volume</h3>
             </div>
             <div class="metric-container">
-                <div id="volume-gauge" class="gauge"></div>
+                <canvas id="volume-gauge"></canvas>
                 <div class="metric-details">
                     <div id="volume-value" class="metric-value">--</div>
                     <div class="metric-label">milliliters</div>
@@ -96,7 +96,7 @@
                 <h3><i class="fas fa-thermometer-half"></i> Temperature</h3>
             </div>
             <div class="metric-container">
-                <div id="temp-gauge" class="gauge"></div>
+                <canvas id="temp-gauge"></canvas>
                 <div class="metric-details">
                     <div id="temp-value" class="metric-value">--</div>
                     <div class="metric-label">Celsius</div>
@@ -104,54 +104,42 @@
             </div>
         </div>
 
-        <!-- Color Analysis Card
+        <!-- Color Analysis Card -->
         <div class="dashboard-card">
             <div class="card-header">
                 <h3><i class="fas fa-palette"></i> Color Analysis</h3>
-            </div> -->
-            <!-- <div class="color-metrics">
-                <div class="color-analysis-container">
-                    Main color preview with hexagon shape
-                    <div class="color-preview-wrapper">
-                        <div class="color-preview-hexagon">
-                            <div class="color-preview" id="color-preview"></div>
+            </div>
+            <div class="color-analysis-card">
+                <div class="color-preview" id="color-preview"></div>
+                <div class="color-details">
+                    <div class="color-hex" id="color-hex"></div>
+                    <div class="color-condition" id="color-condition"></div>
+                </div>
+                <div class="color-bars">
+                    <div class="color-bar-container">
+                        <span class="color-label">R</span>
+                        <div class="color-bar-wrapper">
+                            <div id="red-bar" class="color-bar"></div>
                         </div>
-                        <div class="color-hex-value" id="color-hex">#000000</div>
+                        <span id="red-value" class="color-value">0</span>
                     </div>
-
-                    RGB color components
-                    <div class="color-components">
-                        <div class="color-component">
-                            <div class="component-label">Red</div>
-                            <div class="color-bar-container">
-                                <div class="color-bar" id="red-bar"></div>
-                                <span class="color-value" id="red-value">0</span>
-                            </div>
+                    <div class="color-bar-container">
+                        <span class="color-label">G</span>
+                        <div class="color-bar-wrapper">
+                            <div id="green-bar" class="color-bar"></div>
                         </div>
-                        <div class="color-component">
-                            <div class="component-label">Green</div>
-                            <div class="color-bar-container">
-                                <div class="color-bar" id="green-bar"></div>
-                                <span class="color-value" id="green-value">0</span>
-                            </div>
-                        </div>
-                        <div class="color-component">
-                            <div class="component-label">Blue</div>
-                            <div class="color-bar-container">
-                                <div class="color-bar" id="blue-bar"></div>
-                                <span class="color-value" id="blue-value">0</span>
-                            </div>
-                        </div>
+                        <span id="green-value" class="color-value">0</span>
                     </div>
-
-                    Color analysis results
-                    <div class="color-analysis-result">
-                        <div class="analysis-label">Analysis Result:</div>
-                        <div class="analysis-value" id="color-condition">Analyzing...</div>
+                    <div class="color-bar-container">
+                        <span class="color-label">B</span>
+                        <div class="color-bar-wrapper">
+                            <div id="blue-bar" class="color-bar"></div>
+                        </div>
+                        <span id="blue-value" class="color-value">0</span>
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
 
         <!-- Historical Data Card -->
         <!-- <div class="dashboard-card full-width">
@@ -689,6 +677,75 @@
         grid-template-columns: 1fr;
     }
 }
+
+.metric-container canvas {
+    width: 200px;
+    height: 200px;
+    display: block;
+    margin: 0 auto;
+}
+
+.condition-container {
+    padding: 2rem;
+    text-align: center;
+}
+
+.condition-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 1rem 2rem;
+    border-radius: 0.75rem;
+    display: inline-block;
+}
+
+.condition-value {
+    padding: 1rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.condition-value.normal {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.condition-value.dehydration-risk {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.condition-value.possible-infection {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.condition-value.check-sample {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+}
+
+.condition-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #4f46e5;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 </style>
 
 <script>
@@ -699,6 +756,87 @@ let currentChartType = 'line';
 function isValidData(data) {
     console.log("Received data:", data); // Debug log
     return data && typeof data === 'object' && !data.error;
+}
+
+// Initialize gauges
+let volumeGauge = null;
+let tempGauge = null;
+
+// Initialize gauges on page load
+function initializeGauges() {
+    try {
+        console.log("Initializing gauges..."); // Debug log
+        
+        const volumeCanvas = document.getElementById('volume-gauge');
+        const tempCanvas = document.getElementById('temp-gauge');
+        
+        if (!volumeCanvas || !tempCanvas) {
+            console.error("Canvas elements not found");
+            return;
+        }
+
+        // Initialize Volume Gauge
+        volumeGauge = new Gauge(volumeCanvas).setOptions({
+            angle: -0.2,
+            lineWidth: 0.2,
+            radiusScale: 0.9,
+            pointer: {
+                length: 0.6,
+                strokeWidth: 0.035,
+                color: '#000000'
+            },
+            limitMax: false,
+            limitMin: false,
+            colorStart: '#6FADCF',
+            colorStop: '#8FC0DA',
+            strokeColor: '#E0E0E0',
+            generateGradient: true,
+            highDpiSupport: true,
+            maxValue: 500,
+            minValue: 0,
+            animationSpeed: 32
+        });
+        volumeGauge.maxValue = 500;
+        volumeGauge.setMinValue(0);
+        volumeGauge.set(0); // Set initial value
+
+        // Initialize Temperature Gauge
+        tempGauge = new Gauge(tempCanvas).setOptions({
+            angle: -0.2,
+            lineWidth: 0.2,
+            radiusScale: 0.9,
+            pointer: {
+                length: 0.6,
+                strokeWidth: 0.035,
+                color: '#000000'
+            },
+            limitMax: false,
+            limitMin: false,
+            colorStart: '#FF7373',
+            colorStop: '#FF4040',
+            strokeColor: '#E0E0E0',
+            generateGradient: true,
+            highDpiSupport: true,
+            maxValue: 45,
+            minValue: 30,
+            animationSpeed: 32
+        });
+        tempGauge.maxValue = 45;
+        tempGauge.setMinValue(30);
+        tempGauge.set(30); // Set initial value
+
+        console.log("Gauges initialized successfully"); // Debug log
+    } catch (error) {
+        console.error("Error initializing gauges:", error);
+    }
+}
+
+function updateGauge(elementId, value) {
+    if (elementId === 'volume-gauge' && volumeGauge) {
+        volumeGauge.set(value);
+    } else if (elementId === 'temp-gauge' && tempGauge) {
+        tempGauge.set(value);
+    }
 }
 
 // Initialize dashboard
@@ -738,23 +876,21 @@ async function updateDashboard() {
         }
 
         // Update Urine Condition
-        const urineConditionElement = document.getElementById('urine-condition');
-        if (urineConditionElement && data.color) {
-            urineConditionElement.innerHTML = `
-                <div class="condition-value">
-                    ${data.color.condition || 'Unknown'}
-                </div>
-            `;
+        if (data.color && data.color.condition) {
+            updateUrineCondition(data.color.condition);
         }
 
         // Update Volume
-        const volumeElement = document.getElementById('volume-gauge');
-        if (volumeElement) {
+        if (data.urine_volume !== undefined) {
+            const volumeElement = document.getElementById('volume-value');
+            if (volumeElement) {
+                volumeElement.textContent = `${data.urine_volume.toFixed(1)} mL`;
+            }
             updateGauge('volume-gauge', data.urine_volume);
         }
 
         // Update Temperature
-        if (data.temperature) {
+        if (data.temperature !== undefined) {
             const tempElement = document.getElementById('temp-value');
             if (tempElement) {
                 tempElement.textContent = `${data.temperature.toFixed(1)}°C`;
@@ -834,13 +970,22 @@ function updateUIWithLatestData(data) {
     updateValueWithFade('temp-value', `${data.temperature.toFixed(1)}°C`);
     updateGauge('temp-gauge', data.temperature);
 
-    // Update Color Analysis
+    // Update Urine Condition
     if (data.color && data.color.condition) {
+        updateUrineCondition(data.color.condition);
+    }
+
+    // Update Color Analysis
+    if (data.color) {
         updateColorAnalysis(data.color);
     }
 
     // Update last refresh time
     document.getElementById('update-time').textContent = new Date().toLocaleTimeString();
+    
+    // Debug log
+    console.log("Updated data:", data);
+    console.log("Urine condition:", data.color?.condition);
 }
 
 function updateHistoricalChart(measurements) {
@@ -913,21 +1058,16 @@ function updateChartType(type) {
 }
 
 function showLoadingStates() {
-    const loadingElements = document.querySelectorAll('.risk-indicator, .condition-display, .gauge');
-    loadingElements.forEach(el => {
-        el.innerHTML = `
-            <div class="loading-spinner">
-                <div class="spinner"></div>
-                <span>Analyzing...</span>
-            </div>
-        `;
+    const loadingElements = document.querySelectorAll('.risk-loading, .condition-loading');
+    loadingElements.forEach(element => {
+        element.style.display = 'flex';
     });
 }
 
 function hideLoadingStates() {
-    const loadingSpinners = document.querySelectorAll('.loading-spinner');
-    loadingSpinners.forEach(spinner => {
-        spinner.style.display = 'none';
+    const loadingElements = document.querySelectorAll('.risk-loading, .condition-loading');
+    loadingElements.forEach(element => {
+        element.style.display = 'none';
     });
 }
 
@@ -945,43 +1085,60 @@ function updateColorAnalysis(color) {
     const hexValue = document.getElementById('color-hex');
     const conditionElement = document.getElementById('color-condition');
     
-    // Update color preview and hex value
-    const hexColor = rgbToHex(color.red, color.green, color.blue);
-    preview.style.backgroundColor = `rgb(${color.red},${color.green},${color.blue})`;
-    hexValue.textContent = hexColor;
+    // Check if all required elements exist
+    if (!preview || !hexValue || !conditionElement) {
+        console.warn('Color analysis elements not found in DOM');
+        return;
+    }
     
-    // Update color bars
-    updateColorBar('red', color.red);
-    updateColorBar('green', color.green);
-    updateColorBar('blue', color.blue);
-    
-    // Update condition text with fade effect
-    updateValueWithFade('color-condition', color.condition);
-    
-    // Add appropriate class for styling based on condition
-    setTimeout(() => {
-        conditionElement.className = 'analysis-value';
-        const conditionLower = color.condition.toLowerCase();
-        if (conditionLower.includes('dehydration')) {
-            conditionElement.classList.add('dehydration-risk');
-        } else if (conditionLower.includes('normal')) {
-            conditionElement.classList.add('normal');
-        } else if (conditionLower.includes('infection')) {
-            conditionElement.classList.add('possible-infection');
-        } else {
-            conditionElement.classList.add('check-sample');
-        }
-    }, 300);
+    try {
+        // Update color preview and hex value
+        const hexColor = rgbToHex(color.red, color.green, color.blue);
+        preview.style.backgroundColor = `rgb(${color.red},${color.green},${color.blue})`;
+        hexValue.textContent = hexColor;
+        
+        // Update color bars
+        updateColorBar('red', color.red);
+        updateColorBar('green', color.green);
+        updateColorBar('blue', color.blue);
+        
+        // Update condition text with fade effect
+        updateValueWithFade('color-condition', color.condition);
+        
+        // Add appropriate class for styling based on condition
+        setTimeout(() => {
+            conditionElement.className = 'analysis-value';
+            const conditionLower = color.condition.toLowerCase();
+            if (conditionLower.includes('dehydration')) {
+                conditionElement.classList.add('dehydration-risk');
+            } else if (conditionLower.includes('normal')) {
+                conditionElement.classList.add('normal');
+            } else if (conditionLower.includes('infection')) {
+                conditionElement.classList.add('possible-infection');
+            } else {
+                conditionElement.classList.add('check-sample');
+            }
+        }, 300);
+    } catch (error) {
+        console.error('Error in updateColorAnalysis:', error);
+    }
 }
 
 function updateColorBar(color, value) {
     const bar = document.getElementById(`${color}-bar`);
     const valueSpan = document.getElementById(`${color}-value`);
     
-    if (bar && valueSpan) {
+    if (!bar || !valueSpan) {
+        console.warn(`Color bar elements for ${color} not found`);
+        return;
+    }
+    
+    try {
         bar.style.width = `${(value/255)*100}%`;
         bar.style.backgroundColor = `rgb(${color === 'red' ? value : 0},${color === 'green' ? value : 0},${color === 'blue' ? value : 0})`;
         valueSpan.textContent = value;
+    } catch (error) {
+        console.error(`Error updating ${color} color bar:`, error);
     }
 }
 
@@ -1028,10 +1185,44 @@ function updateConditionStyling(element, condition) {
     }
 }
 
+// Add this function to handle condition updates
+function updateUrineCondition(condition) {
+    const conditionElement = document.getElementById('urine-condition');
+    if (!conditionElement) return;
+
+    let className = '';
+    // Remove "(Light Yellow)", "(Dark Yellow)", etc. from the condition text
+    const baseCondition = condition.split(' (')[0];
+
+    switch (baseCondition) {
+        case 'Normal':
+            className = 'normal';
+            break;
+        case 'Dehydration Risk':
+            className = 'dehydration-risk';
+            break;
+        case 'Possible Infection':
+            className = 'possible-infection';
+            break;
+        default:
+            className = 'check-sample';
+    }
+
+    conditionElement.innerHTML = `
+        <div class="condition-value ${className}">
+            ${condition}
+        </div>
+    `;
+}
+
 // Initialize the dashboard when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Content Loaded"); // Debug log
-    initializeDashboard();
+    initializeGauges();
+    updateDashboard();
+    
+    // Update every 10 seconds
+    setInterval(updateDashboard, 10000);
 });
 
 // Handle window resize
